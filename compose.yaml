@@ -1,0 +1,110 @@
+services:
+  postgres:
+    build: containers/postgres
+    container_name: in-delivery-postgres
+    restart: always
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready -d in-delivery -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+    environment:
+      POSTGRES_DB: in-delivery
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Europe/Moscow
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  keycloak:
+    build: containers/keycloak
+    container_name: in-delivery-keycloak
+    restart: always
+    command: start-dev --db postgres --import-realm
+    ports:
+      - 8443:8443
+    environment:
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/certs/tls.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/certs/tls.key
+    healthcheck:
+      test:
+        ["CMD", "curl", "--head", "fsS", "https://keycloak:8443/health/ready"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+    depends_on:
+      - postgres
+  app:
+    build: .
+    container_name: in-delivery-app
+    command: >
+      alembic upgrade head;
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - 8000:8000
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: in-delivery
+      # - REDIS_HOST=redis
+      # - REDIS_PORT=6379
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      TZ: Europe/Moscow
+    depends_on:
+      - postgres
+      - keycloak
+      # - redis
+  # redis:
+  #   image: redis:7
+  #   container_name: in-delivery-redis
+  #   command: >
+  #     --requirepass ${REDIS_PASSWORD}
+  #   ports:
+  #     - 6379:6379
+  #   environment:
+  #     - TZ=Europe/Moscow
+  #   volumes:
+  #     - redis-data:/data/_data
+  # rabbitmq:
+  #   image: rabbitmq:3.12.2-management
+  #   container_name: in-delivery-rabbitmq
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+  #     - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+  #     - TZ=Europe/Moscow
+  # celery_worker:
+  #   build: .
+  #   container_name: restaurant-celery-worker
+  #   command: celery -A background.celery worker --loglevel=info -P threads
+  #   environment:
+  #     - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+  #     - CELERY_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379
+  #     - TZ=Europe/Moscow
+  #     - APP_URL=http://app:8000
+  #   depends_on:
+  #     - rabbitmq
+  #   volumes:
+  #     - ./admin:/app/admin
+  #     - ./background/xl_parser/cache:/app/background/xl_parser/cache
+  # celery_beat:
+  #   build: .
+  #   container_name: restaurant-celery-beat
+  #   command: celery -A background.celery beat --loglevel=info
+  #   environment:
+  #     - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+  #     - CELERY_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379
+  #     - TZ=Europe/Moscow
+  #   depends_on:
+  #     - rabbitmq
+volumes:
+  postgres-data:
+  # redis-data:

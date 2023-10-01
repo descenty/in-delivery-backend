@@ -24,14 +24,18 @@ redis = "^4.6.0"
 openpyxl = "^3.1.2"
 celery = "^5.3.1"
 aiofiles = "^23.2.1"
+fastapi-keycloak = "^1.0.10"
 
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"
 ipykernel = "^6.25.1"
 types-pyopenssl = "^23.2.0.2"
 types-aiofiles = "^23.1.0.5"
+ruff = "^0.0.291"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+exclude = ["migrations"]
