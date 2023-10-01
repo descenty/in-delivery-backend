@@ -5,11 +5,6 @@ services:
     restart: always
     ports:
       - 5432:5432
-    healthcheck:
-      test: ["CMD", "pg_isready -d in-delivery -U ${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 2s
-      retries: 15
     environment:
       POSTGRES_DB: in-delivery
       POSTGRES_USER: ${POSTGRES_USER}
@@ -17,6 +12,20 @@ services:
       TZ: Europe/Moscow
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "in-delivery",
+          "-U",
+          "${POSTGRES_USER}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   keycloak:
     build: containers/keycloak
     container_name: in-delivery-keycloak
