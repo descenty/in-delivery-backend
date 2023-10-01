@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "restaurant-fastapi"
+version = "0.1.0"
+description = ""
+authors = ["Deverty <bychenkov.a.k@edu.mirea.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.23.1"
+pydantic-settings = "^2.0.2"
+sqlalchemy = "^2.0.19"
+psycopg2-binary = "^2.9.6"
+asyncpg = "^0.28.0"
+anyio = "^3.7.1"
+trio = "^0.22.2"
+pytest = "^7.4.0"
+alembic = "^1.11.1"
+aiohttp = "^3.8.5"
+pre-commit = "^3.3.3"
+fastapi = "^0.101.0"
+httpx = "^0.24.1"
+redis = "^4.6.0"
+openpyxl = "^3.1.2"
+celery = "^5.3.1"
+aiofiles = "^23.2.1"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+ipykernel = "^6.25.1"
+types-pyopenssl = "^23.2.0.2"
+types-aiofiles = "^23.1.0.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

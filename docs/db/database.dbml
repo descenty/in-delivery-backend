@@ -1,0 +1,20 @@
+Project Restaurant {
+  database_type: 'PostgreSQL'
+}
+Table menu {
+  id uuid [pk]
+  title varchar(255)
+  description varchar(255)
+}
+Table submenu {
+  id uuid [pk]
+  title varchar(255)
+  description varchar(255)
+  menu_id int [ref: > menu.id]
+}
+Table dish {
+  id uuid [pk]
+  name varchar(255)
+  price decimal(6,2)
+  submenu_id int [ref: > submenu.id]
+}
