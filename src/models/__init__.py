@@ -1,4 +1,4 @@
 from .category import Category
-from .good import Good
+from .product import Product
 
-__all__: list[str] = ['Category', 'Good']
+__all__: list[str] = ['Category', 'Product']

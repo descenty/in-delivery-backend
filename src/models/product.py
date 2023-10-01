@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from models import Category
 
 
-class Good(BaseModel):
-    __tablename__: str = 'good'
+class Product(BaseModel):
+    __tablename__: str = "good"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -21,6 +21,8 @@ class Good(BaseModel):
     description: Mapped[str] = mapped_column(String(255), nullable=False)
     price: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     category_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey('category.id', ondelete='CASCADE')
+        ForeignKey("category.id", ondelete="CASCADE")
     )
-    category: Mapped["Category"] = relationship('Category', back_populates='goods')
+    category: Mapped["Category"] = relationship(
+        "Category", back_populates="products"
+    )

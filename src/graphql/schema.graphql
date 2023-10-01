@@ -1,0 +1,15 @@
+type Category {
+    id: ID!
+    title: String!
+    description: String
+    products: [Product]
+    parent: Category
+}
+
+type Product {
+    id: ID!
+    title: String!
+    description: String
+    price: Float!
+    category: Category
+}
