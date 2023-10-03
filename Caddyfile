@@ -1,0 +1,4 @@
+descenty.ru {
+    tls /certs/fullchain.pem /certs/privkey.pem
+    reverse_proxy /* budibase:80
+}
