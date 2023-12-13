@@ -1,19 +1,25 @@
 from functools import lru_cache
 from asyncpg import Connection, Pool, connect, create_pool
 
+from core.config import PostgresSettings
 
-async def get_connection(
-    user: str, password: str, host: str, port: int, database: str
-) -> Connection:
+
+async def get_connection(settings: PostgresSettings) -> Connection:
     return await connect(
-        user=user, password=password, host=host, port=port, database=database
+        user=settings.user,
+        password=settings.password,
+        host=settings.host,
+        port=settings.port,
+        database=settings.database,
     )
 
 
-@lru_cache
-async def get_pool(
-    user: str, password: str, host: str, port: int, database: str
-) -> Pool | None:
-    return await create_pool(
-        user=user, password=password, host=host, port=port, database=database
-    )
+async def get_connection_pool(settings: PostgresSettings) -> Pool:
+    async with create_pool(
+        user=settings.user,
+        password=settings.password,
+        host=settings.host,
+        port=settings.port,
+        database=settings.database,
+    ) as pool:
+        return pool

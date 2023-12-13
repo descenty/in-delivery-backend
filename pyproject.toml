@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "restaurant-fastapi"
+name = "in-delivery-backend"
 version = "0.1.0"
 description = ""
 authors = ["Deverty <bychenkov.a.k@edu.mirea.ru>"]
@@ -7,36 +7,25 @@ readme = "README.md"
 packages = [{ include = "src", from = "." }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-uvicorn = "^0.23.1"
-pydantic-settings = "^2.0.2"
-psycopg2-binary = "^2.9.6"
-asyncpg = "^0.28.0"
-anyio = "^3.7.1"
-trio = "^0.22.2"
-pytest = "^7.4.0"
-alembic = "^1.11.1"
-aiohttp = "^3.8.5"
-pre-commit = "^3.3.3"
-fastapi = "^0.101.0"
-httpx = "^0.24.1"
-redis = "^4.6.0"
-openpyxl = "^3.1.2"
-celery = "^5.3.1"
-aiofiles = "^23.2.1"
+python = "^3.12"
+fastapi = "^0.105.0"
+uvicorn = "^0.24.0.post1"
+pydantic-settings = "^2.1.0"
+pytest = "^7.4.3"
+httpx = "^0.25.2"
+redis = "^5.0.1"
 fastapi-keycloak = "^1.0.10"
-strawberry-graphql = {extras = ["debug-server"], version = "^0.209.2"}
-rich = "^13.6.0"
-typer = "^0.9.0"
+strawberry-graphql = "^0.216.1"
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.25.1"
-types-pyopenssl = "^23.2.0.2"
-types-aiofiles = "^23.1.0.5"
-ruff = "^0.0.291"
-mypy = "^1.5.1"
-bandit = "^1.7.5"
+poethepoet = "^0.24.4"
+ipykernel = "^6.27.1"
+asyncpg-stubs = "^0.29.1"
+ruff = "^0.1.7"
+mypy = "^1.7.1"
+bandit = "^1.7.6"
 
 [build-system]
 requires = ["poetry-core"]
@@ -47,3 +36,4 @@ exclude = ["migrations"]
 
 [tool.mypy]
 plugins = "strawberry.ext.mypy_plugin"
+# do not check pep 695
