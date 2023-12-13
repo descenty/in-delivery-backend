@@ -49,26 +49,26 @@ services:
       retries: 15
     depends_on:
       - postgres
-  app:
-    build: .
-    container_name: in-delivery-app
-    command: >
-      alembic upgrade head;
-      uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-    ports:
-      - 8000:8000
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: in-delivery
-      # - REDIS_HOST=redis
-      # - REDIS_PORT=6379
-      # - REDIS_PASSWORD=${REDIS_PASSWORD}
-      TZ: Europe/Moscow
-    depends_on:
-      - postgres
-      - keycloak
-      # - redis
+  # app:
+  #   build: .
+  #   container_name: in-delivery-app
+  #   command: >
+  #     alembic upgrade head;
+  #     uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     POSTGRES_HOST: postgres
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_DB: in-delivery
+  #     # - REDIS_HOST=redis
+  #     # - REDIS_PORT=6379
+  #     # - REDIS_PASSWORD=${REDIS_PASSWORD}
+  #     TZ: Europe/Moscow
+  #   depends_on:
+  #     - postgres
+  #     - keycloak
+  #     # - redis
   # redis:
   #   image: redis:7
   #   container_name: in-delivery-redis
@@ -116,4 +116,5 @@ services:
   #     - rabbitmq
 volumes:
   postgres-data:
+  budibase-data:
   # redis-data:
