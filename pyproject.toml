@@ -10,7 +10,6 @@ packages = [{ include = "src", from = "." }]
 python = "^3.11"
 uvicorn = "^0.23.1"
 pydantic-settings = "^2.0.2"
-sqlalchemy = "^2.0.19"
 psycopg2-binary = "^2.9.6"
 asyncpg = "^0.28.0"
 anyio = "^3.7.1"
