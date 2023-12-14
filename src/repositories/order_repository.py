@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from uuid import UUID
 from asyncpg import Connection
-from models.category import Category
 from repositories import Repository
+from schemas.order import OrderDB
 
 
 class OrderRepository(Repository):
@@ -11,7 +11,7 @@ class OrderRepository(Repository):
         self,
         user_id: UUID,
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[OrderDB]:
         ...
 
     @abstractmethod
@@ -19,7 +19,7 @@ class OrderRepository(Repository):
         self,
         order_id: UUID,
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[OrderDB]:
         ...
 
     @abstractmethod
@@ -28,7 +28,7 @@ class OrderRepository(Repository):
         user_id: UUID,
         # order: OrderCreateDTO
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[OrderDB]:
         ...
 
     @abstractmethod
@@ -36,5 +36,5 @@ class OrderRepository(Repository):
         self,
         category_slug: str,
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[OrderDB]:
         ...

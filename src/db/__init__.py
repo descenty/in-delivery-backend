@@ -1,5 +1,4 @@
-from functools import lru_cache
-from asyncpg import Connection, Pool, connect, create_pool
+from asyncpg import Connection, Pool, Record, connect, create_pool
 
 from core.config import PostgresSettings
 
@@ -15,11 +14,13 @@ async def get_connection(settings: PostgresSettings) -> Connection:
 
 
 async def get_connection_pool(settings: PostgresSettings) -> Pool:
-    async with create_pool(
+    pool: Pool[Record] | None = await create_pool(
         user=settings.user,
         password=settings.password,
         host=settings.host,
         port=settings.port,
         database=settings.database,
-    ) as pool:
-        return pool
+    )
+    if pool is None:
+        raise Exception("No connection pool")
+    return pool

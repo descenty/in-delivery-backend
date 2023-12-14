@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from uuid import UUID
 from asyncpg import Connection
-from models.category import Category
 from repositories import Repository
+from schemas.category import CategoryDB
 
 
 class CartRepository(Repository):
@@ -11,7 +11,7 @@ class CartRepository(Repository):
         self,
         user_id: UUID,
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[CategoryDB]:
         ...
 
     @abstractmethod
@@ -19,5 +19,5 @@ class CartRepository(Repository):
         self,
         category_slug: str,
         conn: Connection,
-    ) -> list[Category]:
+    ) -> list[CategoryDB]:
         ...

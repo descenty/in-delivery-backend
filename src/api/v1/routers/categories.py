@@ -1,28 +1,30 @@
-from uuid import UUID
+from fastapi import APIRouter, HTTPException
+from schemas.category import CategoryDTO
+from services.category_service import CategoryService
+from core.context import app_configuration
 
-from fastapi import APIRouter, Depends, HTTPException
-
-from schemas.submenu import SubmenuCreate, SubmenuDTO
-from services.submenu_service import SubmenuService, submenu_service
-
-router = APIRouter()
+router = APIRouter(tags=["categories"])
 
 
 @router.get(
-    "/all_parent", response_model=list[SubmenuDTO], name="get_all_parent_categories"
+    "/all_parent",
+    response_model=list[CategoryDTO],
+    name="get_all_parent_categories",
 )
-async def get_all_parent_categories(service: SubmenuService = Depends(submenu_service)):
-    return await service.get_all_parent_categories()
+async def get_all_parent_categories() -> list[CategoryDTO]:
+    return await app_configuration.get_service(
+        CategoryService
+    ).get_all_parent_categories()
 
 
 @router.get(
-    "/{category_slug}/subcategories",
-    response_model=SubmenuDTO,
+    "/{category_slug}",
+    response_model=CategoryDTO,
     name="get_all_subcategories",
 )
-async def get_all_subcategories(
-    category_slug: str, service: SubmenuService = Depends(submenu_service)
-):
-    if not await service.get_category(category_slug):
-        raise HTTPException(status_code=404, detail="category not found")
-    return await service.get_all_subcategories()
+async def get_subcategory(category_slug: str) -> CategoryDTO:
+    if category := await app_configuration.get_service(CategoryService).get_category(
+        category_slug
+    ):
+        return category
+    raise HTTPException(status_code=404, detail="Category not found")
