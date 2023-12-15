@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:22.0.3
+FROM quay.io/keycloak/keycloak:latest
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 COPY certs/fullchain.pem /opt/keycloak/conf/certs/tls.crt

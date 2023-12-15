@@ -11,8 +11,8 @@ from services import Service
 
 class CategoryService(Service):
     def __init__(self, repository: CategoryRepository, conn_pool: Pool):
-        super().__init__(conn_pool)
         self.repository: CategoryRepository = repository
+        self.conn_pool = conn_pool
 
     @abstractmethod
     async def get_all_parent_categories(self) -> list[CategoryDTO]:

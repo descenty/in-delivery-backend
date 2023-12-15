@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from schemas.category import CategoryDTO
 from core.context import app_configuration
 from schemas.product import ProductDTO
 from schemas.request import QueryProductsRequest
@@ -13,7 +12,7 @@ router = APIRouter(tags=["products"])
     response_model=list[ProductDTO],
     name="query_products",
 )
-async def get_all_products(
+async def query_products(
     query_products_request: QueryProductsRequest | None = None,
 ) -> list[ProductDTO]:
     if query_products_request is None:

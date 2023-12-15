@@ -23,7 +23,7 @@ class ProductRepositoryImpl(ProductRepository):
         text: str = "",
         category_slug: str = "",
     ) -> list[ProductDB]:
-        text, category_slug = "%Белый%", "pastries"
+        text = f"%{text}%"
         query = "SELECT * FROM product WHERE \
             ( \
                 (title ILIKE $1) OR \
