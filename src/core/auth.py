@@ -1,5 +1,5 @@
-from functools import lru_cache
-from fastapi import Depends
+from async_lru import alru_cache
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from httpx import AsyncClient, Response
 from core.config import settings
@@ -9,7 +9,7 @@ from schemas.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
+@alru_cache(maxsize=1)
 async def get_public_key() -> str:
     async with AsyncClient() as client:
         response: Response = await client.get(
@@ -29,4 +29,4 @@ async def get_user(token: str = Depends(oauth2_scheme)) -> User:
             {"id": payload["sub"], "email": payload["email"], "roles": payload["realm_access"]["roles"]}
         )
     except PyJWTError:
-        raise Exception("Could not validate credentials")
+        raise HTTPException(status_code=401, detail="Could not validate credentials")

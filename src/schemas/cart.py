@@ -1,9 +1,10 @@
+from decimal import Decimal
 from pydantic import BaseModel
 
-
-class CartDB(BaseModel):
-    ...
+from schemas.cart_product import CartProductDTO
 
 
-class Cart(BaseModel):
-    ...
+class CartDTO(BaseModel):
+    total_price: Decimal
+    products: list[CartProductDTO]
+

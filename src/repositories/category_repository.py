@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Optional
 from asyncpg.pool import PoolConnectionProxy
 from repositories import Repository
 from schemas.category import CategoryDB
@@ -13,7 +14,7 @@ class CategoryRepository(Repository):
         ...
 
     @abstractmethod
-    async def get_category_subcategories(
+    async def get_category(
         self, category_slug: str, conn: PoolConnectionProxy
     ) -> CategoryDB | None:
         ...
@@ -30,11 +31,11 @@ class CategoryRepositoryImpl(CategoryRepository):
             for category in await conn.fetch(query)
         ]
 
-    async def get_category_subcategories(
+    async def get_category(
         self,
         category_slug: str,
         conn: PoolConnectionProxy,
-    ) -> CategoryDB | None:
+    ) -> Optional[CategoryDB]:
         query = "WITH RECURSIVE CategoryHierarchy AS \
             (SELECT slug, title, parent_slug FROM category \
                 WHERE slug = $1 UNION ALL \
@@ -42,7 +43,6 @@ class CategoryRepositoryImpl(CategoryRepository):
                         INNER JOIN CategoryHierarchy ch ON c.parent_slug = ch.slug ) \
                             SELECT * FROM CategoryHierarchy"
         result = await conn.fetch(query, category_slug)
-        print(result[1:])
         category = CategoryDB.model_validate(
             {**result[0]} | {"subcategories": [{**category} for category in result[1:]]}
         )

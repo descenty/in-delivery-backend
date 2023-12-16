@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Optional
 
 from asyncpg import Pool
 
@@ -19,7 +20,7 @@ class CategoryService(Service):
         ...
 
     @abstractmethod
-    async def get_category(self, category_slug: str) -> CategoryDTO | None:
+    async def get_category(self, category_slug: str) -> Optional[CategoryDTO]:
         ...
 
 
@@ -31,7 +32,7 @@ class CategoryServiceImpl(CategoryService):
                 for category in await self.repository.get_all_parent_categories(conn)
             ]
 
-    async def get_category(self, category_slug: str) -> CategoryDTO | None:
+    async def get_category(self, category_slug: str) -> Optional[CategoryDTO]:
         async with self.conn_pool.acquire() as conn:
             if category := await self.repository.get_category(category_slug, conn):
                 return CategoryDTO.model_validate(category, from_attributes=True)
