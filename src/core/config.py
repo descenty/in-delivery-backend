@@ -23,18 +23,27 @@ class CelerySettings(BaseModel):
     backend: str = "redis://localhost:6379"
 
 
+class KeyCloakSettings(BaseModel):
+    url: str = "https://127.0.0.1:8443"
+    realm: str = "in-delivery"
+    client_id: str = "backend"
+    client_secret: str = "client-secret"
+    # admin_client_secret: str = "admin-client-secret"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_nested_delimiter="_",
+        env_nested_delimiter="__",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="allow",
     )
     app_url: str = "http://localhost:8000"
-    app_title: str = "restaurant-fastapi"
+    app_title: str = "in-delivery"
     cors_allow_origins: list[str] = ["http://localhost"]
     postgres: PostgresSettings = PostgresSettings()
+    keycloak: KeyCloakSettings = KeyCloakSettings()
     redis: RedisSettings = RedisSettings()
     celery: CelerySettings = CelerySettings()
     menus_xl_path: str = "admin/Menu.xlsx"

@@ -13,7 +13,7 @@ class CategoryRepository(Repository):
         ...
 
     @abstractmethod
-    async def get_category(
+    async def get_category_subcategories(
         self, category_slug: str, conn: PoolConnectionProxy
     ) -> CategoryDB | None:
         ...

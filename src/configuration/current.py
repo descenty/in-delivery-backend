@@ -1,5 +1,6 @@
 from repositories.category_repository import CategoryRepositoryImpl
 from repositories.product_repository import ProductRepositoryImpl
+from services.auth_service import AuthServiceImpl
 from services.category_service import CategoryServiceImpl
 
 from configuration.app import AppConfiguration
@@ -15,5 +16,6 @@ app_configuration = AppConfiguration(
     services=ServicesConfiguration(
         category_service=CategoryServiceImpl,
         product_service=ProductServiceImpl,
+        auth_service=AuthServiceImpl,
     ),
 )

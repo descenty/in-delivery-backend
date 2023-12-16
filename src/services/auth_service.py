@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from os import getenv
+from core.config import settings
 
 from httpx import AsyncClient, Response
 
@@ -26,11 +26,11 @@ class AuthServiceImpl(AuthService):
     async def client_auth(self) -> TokenResponse | None:
         async with AsyncClient() as client:
             response: Response = await client.post(
-                f"{getenv('KC_URL')}/realms/{getenv("KC_REALM")}/protocol/openid-connect/token",
+                f"{settings.keycloak.url}/realms/{settings.keycloak.realm}/protocol/openid-connect/token",
                 data={
                     "grant_type": "client_credentials",
-                    "client_id": getenv("KC_CLIENT_ID"),
-                    "client_secret": getenv("KC_CLIENT_SECRET"),
+                    "client_id": settings.keycloak.client_id,
+                    "client_secret": settings.keycloak.client_secret,
                 },
             )
             if response.status_code == 200:
@@ -40,10 +40,10 @@ class AuthServiceImpl(AuthService):
     async def signin(self, auth_request: AuthRequest) -> TokenResponse | None:
         async with AsyncClient() as client:
             response: Response = await client.post(
-                f"{getenv('KC_URL')}/realms/{getenv('KC_REALM')}/protocol/openid-connect/token",
+                f"{settings.keycloak.url}/realms/{settings.keycloak.realm}/protocol/openid-connect/token",
                 data={
-                    "client_id": getenv("KC_CLIENT_ID"),
-                    "client_secret": getenv("KC_CLIENT_SECRET"),
+                    "client_id": settings.keycloak.client_id,
+                    "client_secret": settings.keycloak.client_secret,
                 }
                 | (
                     {
@@ -65,11 +65,10 @@ class AuthServiceImpl(AuthService):
     async def signup(self, auth_request: AuthRequest) -> str | None:
         client_auth: TokenResponse | None = await self.client_auth()
         if client_auth is None:
-            print("Keycloak client is not authenticated")
-            return None
+            raise Exception("Keycloak client is not authenticated")
         async with AsyncClient() as client:
             response: Response = await client.post(
-                f"{getenv('KC_URL')}/admin/realms/{getenv('KC_REALM')}/users",
+                f"{settings.keycloak.url}/admin/realms/{settings.keycloak.realm}/users",
                 headers={"Authorization": f"Bearer {client_auth.access_token}"},
                 json={
                     "email": auth_request.username,
@@ -79,11 +78,11 @@ class AuthServiceImpl(AuthService):
                     ],
                 },
             )
-            match(response.status_code):
+            match (response.status_code):
                 case 201:
-                    return response.headers["Location"].split('/')[7]
+                    return response.headers["Location"].split("/")[7]
                 case 409:
-                    print("User already exists")
+                    raise Exception("User already exists")
                 case 400:
-                    print("Invalid request")
+                    raise Exception("Invalid request")
         return None
