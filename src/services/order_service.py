@@ -43,7 +43,6 @@ class OrderServiceImpl(OrderService):
                 for order in await self.repository.get_user_orders(user_id, conn)
             ]
 
-    @abstractmethod
     async def get_user_order_by_id(
         self, user_id: UUID, order_id: UUID
     ) -> Optional[OrderDTO]:
@@ -54,7 +53,6 @@ class OrderServiceImpl(OrderService):
                 return OrderDTO.model_validate(order, from_attributes=True)
             return None
 
-    @abstractmethod
     async def create_order_from_cart(self, user_id: UUID) -> Optional[OrderDTO]:
         async with self.conn_pool.acquire() as conn:
             if order := await self.repository.create_order_from_cart(user_id, conn):

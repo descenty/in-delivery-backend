@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-from core.auth import get_user
+from fastapi import APIRouter, HTTPException
 from schemas.category import CategoryDTO
 from services.category_service import CategoryService
 from core.context import app_configuration
@@ -12,7 +11,7 @@ router = APIRouter(tags=["categories"])
     response_model=list[CategoryDTO],
     name="get_all_parent_categories",
 )
-async def get_all_parent_categories(user=Depends(get_user)) -> list[CategoryDTO]:
+async def get_all_parent_categories() -> list[CategoryDTO]:
     return await app_configuration.get_service(
         CategoryService
     ).get_all_parent_categories()

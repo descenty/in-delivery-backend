@@ -46,16 +46,31 @@ class AppConfiguration:
             self.services, re.sub(camel_pattern, "_", service_type.__name__).lower()
         )
         if service_type not in self.services_instances:
-            # TODO use __init__ function signature instead of a stupid try
             try:
+                init_parameters = {
+                    parameter_name: parameter
+                    for parameter_name, parameter in signature(
+                        target_service.__init__
+                    ).parameters.items()
+                    if parameter != "self"
+                }
                 self.services_instances[service_type] = target_service(
-                    repository=self.get_repository(
-                        signature(target_service.__init__)
-                        .parameters["repository"]
-                        .annotation
-                    ),
-                    conn_pool=self.conn_pool,
+                    **(
+                        {
+                            parameter_name: self.get_repository(
+                                parameter_type.annotation
+                            )
+                            for parameter_name, parameter_type in init_parameters.items()
+                            if parameter_type.annotation.__base__ == Repository
+                        }
+                        | {
+                            parameter_name: self.get_service(parameter_type.annotation)
+                            for parameter_name, parameter_type in init_parameters.items()
+                            if parameter_type.annotation.__base__ == Service
+                        }
+                        | {"conn_pool": self.conn_pool}
+                    )
                 )
-            except Exception:
+            except Exception as e:
                 self.services_instances[service_type] = target_service()
         return self.services_instances[service_type]

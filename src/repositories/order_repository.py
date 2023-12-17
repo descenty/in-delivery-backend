@@ -33,14 +33,6 @@ class OrderRepository(Repository):
     ) -> Optional[OrderDB]:
         ...
 
-    @abstractmethod
-    async def get_all_subcategories(
-        self,
-        category_slug: str,
-        conn: PoolConnectionProxy,
-    ) -> Optional[OrderDB]:
-        ...
-
 
 class OrderRepositoryImpl(OrderRepository):
     async def get_user_orders(
