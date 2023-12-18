@@ -1,4 +1,6 @@
 from abc import abstractmethod
+
+from fastapi import HTTPException
 from core.config import settings
 
 from httpx import AsyncClient, Response
@@ -58,8 +60,13 @@ class AuthServiceImpl(AuthService):
                     }
                 ),
             )
-            if response.status_code == 200:
-                return TokenResponse.model_validate(response.json())
+            match (response.status_code):
+                case 200:
+                    return TokenResponse.model_validate(response.json())
+                case 400:
+                    raise HTTPException(400, "Invalid request")
+                case 401:
+                    raise HTTPException(401, "Invalid credentials")
         return None
 
     async def signup(self, auth_request: AuthRequest) -> str | None:
@@ -82,7 +89,7 @@ class AuthServiceImpl(AuthService):
                 case 201:
                     return response.headers["Location"].split("/")[7]
                 case 409:
-                    raise Exception("User already exists")
+                    raise HTTPException(400, "User already exists")
                 case 400:
-                    raise Exception("Invalid request")
+                    raise HTTPException(400, "Invalid request")
         return None

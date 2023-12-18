@@ -1,10 +1,11 @@
 from abc import abstractmethod
+import json
 from typing import Optional
 from uuid import UUID
 from asyncpg import Record
 from repositories import Repository
 from schemas.cart import CartDTO
-from schemas.cart_product import CartProductDB, CartProductUpdateDTO
+from schemas.cart_product import CartProductDTO, CartProductUpdateDTO
 from asyncpg.pool import PoolConnectionProxy
 
 
@@ -30,7 +31,7 @@ class CartRepository(Repository):
         product_id: UUID,
         cart_product_update: CartProductUpdateDTO,
         conn: PoolConnectionProxy,
-    ) -> CartProductDB:
+    ) -> CartProductDTO:
         ...
 
     @abstractmethod
@@ -59,9 +60,10 @@ class CartRepositoryImpl(CartRepository):
         return CartDTO.model_validate(
             {
                 "products": [
-                    CartProductDB.model_validate({**product}) for product in result[0]
+                    CartProductDTO.model_validate(product)
+                    for product in json.loads({**result}["json_agg"])
                 ],
-                "total_price": result[1],
+                "total_price": {**result}["total_price"],
             }
         )
 
@@ -83,7 +85,7 @@ class CartRepositoryImpl(CartRepository):
         product_id: UUID,
         cart_product_update: CartProductUpdateDTO,
         conn: PoolConnectionProxy,
-    ) -> CartProductDB:
+    ) -> CartProductDTO:
         query = "UPDATE cart_product SET quantity = $3, is_active = $4 WHERE user_id = $1 AND product_id = $2 RETURNING *"
         result: Record | None = await conn.fetchrow(
             query,
@@ -94,7 +96,7 @@ class CartRepositoryImpl(CartRepository):
         )
         if result is None:
             raise Exception("Cart product not found")
-        return CartProductDB.model_validate({**result})
+        return CartProductDTO.model_validate({**result})
 
     async def delete_cart_product(
         self, user_id: UUID, product_id: UUID, conn: PoolConnectionProxy

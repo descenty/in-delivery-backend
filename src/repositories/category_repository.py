@@ -1,8 +1,9 @@
 from abc import abstractmethod
+import json
 from typing import Optional
 from asyncpg.pool import PoolConnectionProxy
 from repositories import Repository
-from schemas.category import CategoryDB
+from schemas.category import CategoryCascadeDTO, ParentCategoryDTO
 
 
 class CategoryRepository(Repository):
@@ -10,13 +11,13 @@ class CategoryRepository(Repository):
     async def get_all_parent_categories(
         self,
         conn: PoolConnectionProxy,
-    ) -> list[CategoryDB]:
+    ) -> list[ParentCategoryDTO]:
         ...
 
     @abstractmethod
     async def get_category(
         self, category_slug: str, conn: PoolConnectionProxy
-    ) -> CategoryDB | None:
+    ) -> CategoryCascadeDTO | None:
         ...
 
 
@@ -24,10 +25,25 @@ class CategoryRepositoryImpl(CategoryRepository):
     async def get_all_parent_categories(
         self,
         conn: PoolConnectionProxy,
-    ) -> list[CategoryDB]:
-        query = "SELECT * FROM category WHERE parent_slug is NULL"
+    ) -> list[ParentCategoryDTO]:
+        query = """
+        SELECT json_build_object(
+            'slug', c.slug,
+            'title', c.title,
+            'product_count', (
+            SELECT COALESCE(SUM(sub_product_count), 0)
+            FROM (
+                SELECT COUNT(*) AS sub_product_count
+                FROM product p
+                JOIN category sc ON p.category_slug = sc.slug
+                WHERE sc.parent_slug = c.slug
+                GROUP BY p.category_slug
+            ) AS subcategory_counts
+        )
+        ) FROM category c WHERE parent_slug is NULL
+        """
         return [
-            CategoryDB.model_validate({**category})
+            ParentCategoryDTO.model_validate(json.loads({**category}["json_build_object"]))
             for category in await conn.fetch(query)
         ]
 
@@ -35,15 +51,48 @@ class CategoryRepositoryImpl(CategoryRepository):
         self,
         category_slug: str,
         conn: PoolConnectionProxy,
-    ) -> Optional[CategoryDB]:
-        query = "WITH RECURSIVE CategoryHierarchy AS \
-            (SELECT slug, title, parent_slug FROM category \
-                WHERE slug = $1 UNION ALL \
-                    SELECT c.slug, c.title, c.parent_slug FROM category c \
-                        INNER JOIN CategoryHierarchy ch ON c.parent_slug = ch.slug ) \
-                            SELECT * FROM CategoryHierarchy"
-        result = await conn.fetch(query, category_slug)
-        category = CategoryDB.model_validate(
-            {**result[0]} | {"subcategories": [{**category} for category in result[1:]]}
+    ) -> Optional[CategoryCascadeDTO]:
+        query = """
+SELECT
+    json_build_object(
+        'slug', c.slug,
+        'title', c.title,
+        'product_count', (
+            SELECT COALESCE(SUM(sub_product_count), 0)
+            FROM (
+                SELECT COUNT(*) AS sub_product_count
+                FROM product p
+                JOIN category sc ON p.category_slug = sc.slug
+                WHERE sc.parent_slug = c.slug
+                GROUP BY p.category_slug
+            ) AS subcategory_counts
+        ),
+        'subcategories', (
+            SELECT json_agg(json_build_object(
+                'slug', sc.slug,
+                'title', sc.title,
+                'product_count', (
+                    SELECT COUNT(*)
+                    FROM product p
+                    WHERE p.category_slug = sc.slug
+                ),
+                'products', (
+                    SELECT json_agg(p)
+                    FROM product p
+                    WHERE p.category_slug = sc.slug
+                )
+            ))
+            FROM category sc
+            WHERE sc.parent_slug = c.slug
+        )
+    )
+FROM category c
+WHERE c.slug = $1
+        """
+        result = await conn.fetchrow(query, category_slug)
+        if result is None:
+            return None
+        category = CategoryCascadeDTO.model_validate(
+            json.loads({**result}["json_build_object"])
         )
         return category

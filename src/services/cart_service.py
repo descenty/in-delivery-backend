@@ -46,7 +46,9 @@ class CartService(Service):
 class CartServiceImpl(CartService):
     async def get_cart(self, user_id: UUID) -> CartDTO:
         async with self.conn_pool.acquire() as conn:
-            return await self.repository.get_user_cart(user_id, conn)
+            return CartDTO.model_validate(
+                (await self.repository.get_user_cart(user_id, conn)).model_dump()
+            )
 
     async def add_product_to_cart(
         self, user_id: UUID, product_id: UUID, quantity: int

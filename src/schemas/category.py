@@ -1,16 +1,30 @@
 from __future__ import annotations
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
+from schemas.product import ProductDTO
 
-class CategoryDB(BaseModel):
+class ParentCategoryDTO(BaseModel):
     slug: str
     title: str
-    parent_slug: str | None = None
-    subcategories: list[CategoryDB] | None = None
+    product_count: int
 
-
-class CategoryDTO(BaseModel):
+class SubcategoryCascadeDTO(BaseModel):
     slug: str
     title: str
-    parent_slug: str | None = None
-    subcategories: list[CategoryDTO] | None = None
+    product_count: int
+    products: list[ProductDTO] | None
+
+    @validator("products")
+    def set_name(cls, products: list[ProductDTO] | None):
+        return products or []
+
+
+class CategoryCascadeDTO(BaseModel):
+    slug: str
+    title: str
+    product_count: int
+    subcategories: list[SubcategoryCascadeDTO] | None = None
+
+    @validator("subcategories")
+    def set_name(cls, subcategories: list[SubcategoryCascadeDTO] | None):
+        return subcategories or []
