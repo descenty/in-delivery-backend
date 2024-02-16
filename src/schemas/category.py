@@ -15,7 +15,7 @@ class SubcategoryCascadeDTO(BaseModel):
     products: list[ProductDTO] | None
 
     @validator("products")
-    def set_name(cls, products: list[ProductDTO] | None):
+    def products_validator(cls, products: list[ProductDTO] | None):
         return products or []
 
 
@@ -26,5 +26,5 @@ class CategoryCascadeDTO(BaseModel):
     subcategories: list[SubcategoryCascadeDTO] | None = None
 
     @validator("subcategories")
-    def set_name(cls, subcategories: list[SubcategoryCascadeDTO] | None):
+    def subacategories_validator(cls, subcategories: list[SubcategoryCascadeDTO] | None):
         return subcategories or []

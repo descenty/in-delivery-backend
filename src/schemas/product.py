@@ -28,3 +28,10 @@ class ProductDTO(BaseModel):
     energy: int
     weight: int
     category_slug: str
+
+
+class ProductShortDTO(BaseModel):
+    id: UUID | None = None
+    title: str
+    price: float
+    description: str

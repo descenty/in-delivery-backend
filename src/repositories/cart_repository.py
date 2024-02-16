@@ -8,6 +8,8 @@ from schemas.cart import CartDTO
 from schemas.cart_product import CartProductDTO, CartProductUpdateDTO
 from asyncpg.pool import PoolConnectionProxy
 
+from schemas.product import ProductShortDTO
+
 
 class CartRepository(Repository):
     @abstractmethod
@@ -15,14 +17,12 @@ class CartRepository(Repository):
         self,
         user_id: UUID,
         conn: PoolConnectionProxy,
-    ) -> CartDTO:
-        ...
+    ) -> CartDTO: ...
 
     @abstractmethod
     async def add_product_to_cart(
         self, user_id: UUID, product_id: UUID, quantity: int, conn: PoolConnectionProxy
-    ) -> Optional[UUID]:
-        ...
+    ) -> Optional[UUID]: ...
 
     @abstractmethod
     async def update_cart_product(
@@ -31,37 +31,42 @@ class CartRepository(Repository):
         product_id: UUID,
         cart_product_update: CartProductUpdateDTO,
         conn: PoolConnectionProxy,
-    ) -> CartProductDTO:
-        ...
+    ) -> CartProductDTO: ...
 
     @abstractmethod
     async def delete_cart_product(
         self, user_id: UUID, product_id: UUID, conn: PoolConnectionProxy
-    ) -> Optional[UUID]:
-        ...
+    ) -> Optional[UUID]: ...
 
     @abstractmethod
     async def delete_active_cart_products(
         self, user_id: UUID, conn: PoolConnectionProxy
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 class CartRepositoryImpl(CartRepository):
     async def get_user_cart(self, user_id: UUID, conn: PoolConnectionProxy) -> CartDTO:
         query = "SELECT JSON_AGG \
-            (JSON_BUILD_OBJECT('product_id', cp.product_id, 'quantity', cp.quantity)), \
+            (JSON_BUILD_OBJECT('product', JSON_BUILD_OBJECT('id', p.id, 'title', p.title, 'price', p.price, 'description', p.description), 'quantity', cp.quantity)), \
                 SUM(p.price) total_price FROM cart_product cp \
                     LEFT JOIN product p ON p.id = cp.product_id \
                         WHERE cp.user_id = $1 GROUP BY cp.user_id"
         result: Optional[Record] = await conn.fetchrow(query, user_id)
         if result is None:
             return CartDTO.model_validate({"products": [], "total_price": 0})
+        print(result)
         return CartDTO.model_validate(
             {
                 "products": [
-                    CartProductDTO.model_validate(product)
-                    for product in json.loads({**result}["json_agg"])
+                    CartProductDTO.model_validate(
+                        {
+                            "product": ProductShortDTO.model_validate(
+                                cart_product["product"]
+                            ),
+                            "quantity": cart_product["quantity"],
+                        }
+                    )
+                    for cart_product in json.loads({**result}["json_agg"])
                 ],
                 "total_price": {**result}["total_price"],
             }
