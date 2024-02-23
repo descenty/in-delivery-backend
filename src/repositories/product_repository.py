@@ -12,8 +12,7 @@ class ProductRepository(Repository):
         conn: PoolConnectionProxy,
         text: str = "",
         category_slug: str = "",
-    ) -> list[ProductDB]:
-        ...
+    ) -> list[ProductDB]: ...
 
 
 class ProductRepositoryImpl(ProductRepository):
@@ -29,7 +28,7 @@ class ProductRepositoryImpl(ProductRepository):
                 (title ILIKE $1) OR \
                 (description ILIKE $1) \
             ) \
-            AND (category_slug = $2)"
+            AND $2 = '' OR (category_slug = $2)"
         print(f"Text: {text}, Category: {category_slug}")
         return [
             ProductDB.model_validate({**product})

@@ -1,5 +1,6 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+from core.config import settings
 
 
 class ProductDB(BaseModel):
@@ -20,6 +21,7 @@ class ProductDTO(BaseModel):
     id: UUID | None = None
     title: str
     description: str
+    image: str = ""
     price: float
     best_before: int
     proteins: float
@@ -28,6 +30,11 @@ class ProductDTO(BaseModel):
     energy: int
     weight: int
     category_slug: str
+
+    @model_validator(mode="after")
+    def validator(self):
+        self.image = f"{settings.s3_url}/products/{self.id}.png"
+        return self
 
 
 class ProductShortDTO(BaseModel):

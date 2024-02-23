@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     keycloak: KeyCloakSettings = KeyCloakSettings()
     redis: RedisSettings = RedisSettings()
     celery: CelerySettings = CelerySettings()
+    s3_url: str = "http://localhost:9000/in-delivery"
     menus_xl_path: str = "admin/Menu.xlsx"
 
 

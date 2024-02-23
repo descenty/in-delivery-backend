@@ -20,3 +20,14 @@ async def query_products(
     return await app_configuration.get_service(ProductService).query_products(
         query_products_request.text, query_products_request.category_slug
     )
+
+
+@router.get(
+    "/search",
+    response_model=list[ProductDTO],
+    name="search_products",
+)
+async def search_products(
+    text: str = "",
+) -> list[ProductDTO]:
+    return await app_configuration.get_service(ProductService).search_products(text)
