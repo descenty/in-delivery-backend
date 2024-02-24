@@ -9,6 +9,7 @@ from services.category_service import CategoryServiceImpl
 from configuration.app import AppConfiguration
 from configuration.repository import RepositoriesConfiguration
 from configuration.service import ServicesConfiguration
+from services.geo_service import GeoServiceImpl
 from services.order_service import OrderServiceImpl
 from services.product_service import ProductServiceImpl
 
@@ -25,5 +26,6 @@ app_configuration = AppConfiguration(
         product_service=ProductServiceImpl,
         cart_service=CartServiceImpl,
         order_service=OrderServiceImpl,
+        geo_service=GeoServiceImpl,
     ),
 )

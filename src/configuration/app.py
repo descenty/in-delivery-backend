@@ -71,6 +71,6 @@ class AppConfiguration:
                         | {"conn_pool": self.conn_pool}
                     )
                 )
-            except Exception as e:
+            except Exception as _:
                 self.services_instances[service_type] = target_service()
         return self.services_instances[service_type]

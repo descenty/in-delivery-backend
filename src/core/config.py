@@ -31,6 +31,11 @@ class KeyCloakSettings(BaseModel):
     # admin_client_secret: str = "admin-client-secret"
 
 
+class DadataSettings(BaseModel):
+    api_key: str = ""
+    secret_key: str = ""
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -46,6 +51,7 @@ class Settings(BaseSettings):
     keycloak: KeyCloakSettings = KeyCloakSettings()
     redis: RedisSettings = RedisSettings()
     celery: CelerySettings = CelerySettings()
+    dadata: DadataSettings = DadataSettings()
     s3_url: str = "http://localhost:9000/in-delivery"
     menus_xl_path: str = "admin/Menu.xlsx"
 
