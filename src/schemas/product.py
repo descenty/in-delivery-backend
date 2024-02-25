@@ -42,3 +42,9 @@ class ProductShortDTO(BaseModel):
     title: str
     price: float
     description: str
+    image: str = ""
+
+    @model_validator(mode="after")
+    def validator(self):
+        self.image = f"{settings.s3_url}/products/{self.id}.png"
+        return self

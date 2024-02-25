@@ -5,7 +5,7 @@ from uuid import UUID
 from asyncpg import Record
 from repositories import Repository
 from schemas.cart import CartDTO
-from schemas.cart_product import CartProductDTO, CartProductUpdateDTO
+from schemas.cart_product import CartProductDTO, CartProductUpdateRequest
 from asyncpg.pool import PoolConnectionProxy
 
 from schemas.product import ProductShortDTO
@@ -29,9 +29,9 @@ class CartRepository(Repository):
         self,
         user_id: UUID,
         product_id: UUID,
-        cart_product_update: CartProductUpdateDTO,
+        cart_product_update: CartProductUpdateRequest,
         conn: PoolConnectionProxy,
-    ) -> CartProductDTO: ...
+    ) -> None: ...
 
     @abstractmethod
     async def delete_cart_product(
@@ -48,13 +48,12 @@ class CartRepositoryImpl(CartRepository):
     async def get_user_cart(self, user_id: UUID, conn: PoolConnectionProxy) -> CartDTO:
         query = "SELECT JSON_AGG \
             (JSON_BUILD_OBJECT('product', JSON_BUILD_OBJECT('id', p.id, 'title', p.title, 'price', p.price, 'description', p.description), 'quantity', cp.quantity)), \
-                SUM(p.price) total_price FROM cart_product cp \
+                SUM(p.price * cp.quantity) total_price FROM cart_product cp \
                     LEFT JOIN product p ON p.id = cp.product_id \
                         WHERE cp.user_id = $1 GROUP BY cp.user_id"
         result: Optional[Record] = await conn.fetchrow(query, user_id)
         if result is None:
             return CartDTO.model_validate({"products": [], "total_price": 0})
-        print(result)
         return CartDTO.model_validate(
             {
                 "products": [
@@ -88,11 +87,11 @@ class CartRepositoryImpl(CartRepository):
         self,
         user_id: UUID,
         product_id: UUID,
-        cart_product_update: CartProductUpdateDTO,
+        cart_product_update: CartProductUpdateRequest,
         conn: PoolConnectionProxy,
-    ) -> CartProductDTO:
-        query = "UPDATE cart_product SET quantity = $3, is_active = $4 WHERE user_id = $1 AND product_id = $2 RETURNING *"
-        result: Record | None = await conn.fetchrow(
+    ) -> None:
+        query = "UPDATE cart_product SET quantity = $3, is_active = $4 WHERE user_id = $1 AND product_id = $2 RETURNING product_id, quantity, is_active"
+        result = await conn.fetchrow(
             query,
             user_id,
             product_id,
@@ -101,16 +100,15 @@ class CartRepositoryImpl(CartRepository):
         )
         if result is None:
             raise Exception("Cart product not found")
-        return CartProductDTO.model_validate({**result})
 
     async def delete_cart_product(
         self, user_id: UUID, product_id: UUID, conn: PoolConnectionProxy
     ) -> Optional[UUID]:
         query = "DELETE FROM cart_product WHERE user_id = $1 AND product_id = $2 RETURNING product_id"
-        result: str | None = await conn.execute(query, user_id, product_id)
+        result = await conn.fetchrow(query, user_id, product_id)
         if result is None:
             return None
-        return UUID(result)
+        return result[0]
 
     async def delete_active_cart_products(
         self, user_id: UUID, conn: PoolConnectionProxy

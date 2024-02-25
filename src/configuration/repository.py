@@ -1,10 +1,13 @@
 from dataclasses import dataclass
-from configuration import Configuration
-from repositories.cart_repository import CartRepository
 
+from repositories.address_repository import AddressRepository
+from repositories.cart_repository import CartRepository
 from repositories.category_repository import CategoryRepository
+from repositories.customer_repository import CustomerRepository
 from repositories.order_repository import OrderRepository
 from repositories.product_repository import ProductRepository
+
+from configuration import Configuration
 
 
 @dataclass
@@ -13,3 +16,5 @@ class RepositoriesConfiguration(Configuration):
     product_repository: type[ProductRepository]
     cart_repository: type[CartRepository]
     order_repository: type[OrderRepository]
+    address_repository: type[AddressRepository]
+    customer_repository: type[CustomerRepository]

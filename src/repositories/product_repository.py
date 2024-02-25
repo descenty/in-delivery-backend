@@ -29,7 +29,6 @@ class ProductRepositoryImpl(ProductRepository):
                 (description ILIKE $1) \
             ) \
             AND $2 = '' OR (category_slug = $2)"
-        print(f"Text: {text}, Category: {category_slug}")
         return [
             ProductDB.model_validate({**product})
             for product in await conn.fetch(query, text, category_slug)

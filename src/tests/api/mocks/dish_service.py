@@ -14,7 +14,6 @@ class DishServiceMock:
         self.dishes = dishes
 
     async def get_all(self, menu_id: uuid.UUID, submenu_id: uuid.UUID) -> list[DishDTO]:
-        print(self.dishes)
         return [
             dish
             for dish in self.dishes

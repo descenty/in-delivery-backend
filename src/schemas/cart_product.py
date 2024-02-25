@@ -11,11 +11,11 @@ class CartProductDTO(BaseModel):
     # is_active: bool
 
 
-class CartProductAddDTO(BaseModel):
-    id: UUID
+class CartProductAddRequest(BaseModel):
+    product_id: UUID
     quantity: int
 
 
-class CartProductUpdateDTO(BaseModel):
+class CartProductUpdateRequest(BaseModel):
     quantity: int
-    is_active: bool
+    is_active: bool = True

@@ -12,16 +12,13 @@ from services import Service
 
 class AuthService(Service):
     @abstractmethod
-    async def client_auth(self) -> TokenResponse | None:
-        ...
+    async def client_auth(self) -> TokenResponse | None: ...
 
     @abstractmethod
-    async def signin(self, auth_request: AuthRequest) -> TokenResponse | None:
-        ...
+    async def signin(self, auth_request: AuthRequest) -> TokenResponse | None: ...
 
     @abstractmethod
-    async def signup(self, auth_request: AuthRequest) -> str | None:
-        ...
+    async def signup(self, auth_request: AuthRequest) -> str | None: ...
 
 
 class AuthServiceImpl(AuthService):

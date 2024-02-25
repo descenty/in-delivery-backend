@@ -40,7 +40,7 @@ class OrderRepositoryImpl(OrderRepository):
         user_id: UUID,
         conn: PoolConnectionProxy,
     ) -> list[OrderDB]:
-        query = "SELECT * FROM orders WHERE user_id = $1"
+        query = "SELECT * FROM 'order' WHERE user_id = $1"
         result = await conn.fetch(query, user_id)
         return [OrderDB.model_validate({**order}) for order in result]
 
@@ -50,7 +50,7 @@ class OrderRepositoryImpl(OrderRepository):
         order_id: UUID,
         conn: PoolConnectionProxy,
     ) -> Optional[OrderDB]:
-        query = "SELECT * FROM orders WHERE user_id = $1 AND id = $2"
+        query = "SELECT * FROM 'order' WHERE user_id = $1 AND id = $2"
         result: Optional[Record] = await conn.fetchrow(query, user_id, order_id)
         if result is None:
             return None
@@ -61,7 +61,7 @@ class OrderRepositoryImpl(OrderRepository):
         user_id: UUID,
         conn: PoolConnectionProxy,
     ) -> Optional[OrderDB]:
-        query = "INSERT INTO orders (user_id) VALUES ($1) RETURNING *"
+        query = "INSERT INTO 'order' (user_id) VALUES ($1) RETURNING *"
         result: Optional[Record] = await conn.fetchrow(query, user_id)
         if result is None:
             return None

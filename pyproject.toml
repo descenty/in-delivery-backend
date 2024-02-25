@@ -21,6 +21,7 @@ pyjwt = "^2.8.0"
 cryptography = "^41.0.7"
 async-lru = "^2.0.4"
 thefuzz = "^0.22.1"
+poethepoet = "^0.24.4"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -41,5 +42,8 @@ exclude = ["migrations"]
 
 [tool.mypy]
 plugins = "strawberry.ext.mypy_plugin"
-disable_error_code = "type-abstract"
 # do not check pep 695
+disable_error_code = "type-abstract"
+
+[tool.poe.tasks]
+run = "python src/main.py"
