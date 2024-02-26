@@ -21,27 +21,21 @@ class OrderService(Service):
         self.conn_pool = conn_pool
 
     @abstractmethod
-    async def get_user_orders(self, user_id: UUID) -> list[OrderDTO]:
-        ...
+    async def get_user_orders(self, user_id: UUID) -> list[OrderDTO]: ...
 
     @abstractmethod
     async def get_user_order_by_id(
         self, user_id: UUID, order_id: UUID
-    ) -> Optional[OrderDTO]:
-        ...
+    ) -> Optional[OrderDTO]: ...
 
     @abstractmethod
-    async def create_order_from_cart(self, user_id: UUID) -> Optional[OrderDTO]:
-        ...
+    async def create_order_from_cart(self, user_id: UUID) -> Optional[OrderDTO]: ...
 
 
 class OrderServiceImpl(OrderService):
     async def get_user_orders(self, user_id: UUID) -> list[OrderDTO]:
         async with self.conn_pool.acquire() as conn:
-            return [
-                OrderDTO.model_validate(order.model_dump())
-                for order in await self.repository.get_user_orders(user_id, conn)
-            ]
+            return await self.repository.get_user_orders(user_id, conn)
 
     async def get_user_order_by_id(
         self, user_id: UUID, order_id: UUID
@@ -50,7 +44,7 @@ class OrderServiceImpl(OrderService):
             if order := await self.repository.get_user_order_by_id(
                 user_id, order_id, conn
             ):
-                return OrderDTO.model_validate(order, from_attributes=True)
+                return order
             return None
 
     async def create_order_from_cart(self, user_id: UUID) -> Optional[OrderDTO]:

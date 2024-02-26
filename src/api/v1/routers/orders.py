@@ -27,7 +27,7 @@ async def get_user_order(
     )
 
 
-@router.post("cart/create_order", name="create-order")
+@router.post("/cart/create_order", name="create-order")
 async def create_order(user: User = Depends(get_user)) -> Optional[OrderDTO]:
     return await app_configuration.get_service(OrderService).create_order_from_cart(
         user.id

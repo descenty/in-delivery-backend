@@ -11,6 +11,14 @@ class CartProductDTO(BaseModel):
     # is_active: bool
 
 
+class CartProductDB(BaseModel):
+    user_id: UUID
+    product_id: UUID
+    is_active: bool
+    quantity: int
+    price: float
+
+
 class CartProductAddRequest(BaseModel):
     product_id: UUID
     quantity: int

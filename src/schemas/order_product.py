@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from schemas.product import ProductShortDTO
+
 
 class OrderProductDB(BaseModel):
     order_id: UUID
@@ -9,5 +11,6 @@ class OrderProductDB(BaseModel):
     quantity: int
 
 
-class OrderProductDTO(OrderProductDB):
-    ...
+class OrderProductDTO(BaseModel):
+    product: ProductShortDTO
+    quantity: int

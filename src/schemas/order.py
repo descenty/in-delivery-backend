@@ -4,6 +4,8 @@ from enum import Enum
 from uuid import UUID
 from pydantic import BaseModel
 
+from schemas.order_product import OrderProductDTO
+
 
 class ORDER_STATUS(str, Enum):
     PENDING = "pending"
@@ -20,8 +22,7 @@ class OrderDB(BaseModel):
     total_price: Decimal
     status: ORDER_STATUS
     created_at: datetime
-    updated_at: datetime
 
 
 class OrderDTO(OrderDB):
-    ...
+    products: list[OrderProductDTO]

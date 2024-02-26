@@ -6,7 +6,7 @@ from asyncpg import Pool
 from repositories.cart_repository import CartRepository
 
 from schemas.cart import CartDTO
-from schemas.cart_product import CartProductDTO, CartProductUpdateRequest
+from schemas.cart_product import CartProductUpdateRequest
 
 from services import Service
 

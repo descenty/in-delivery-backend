@@ -90,14 +90,18 @@ class CartRepositoryImpl(CartRepository):
         cart_product_update: CartProductUpdateRequest,
         conn: PoolConnectionProxy,
     ) -> None:
-        query = "UPDATE cart_product SET quantity = $3, is_active = $4 WHERE user_id = $1 AND product_id = $2 RETURNING product_id, quantity, is_active"
-        result = await conn.fetchrow(
-            query,
-            user_id,
-            product_id,
-            cart_product_update.quantity,
-            cart_product_update.is_active,
-        )
+        if cart_product_update.quantity < 1:
+            query = "DELETE FROM cart_product WHERE user_id = $1 AND product_id = $2 RETURNING product_id"
+            result = await conn.fetchrow(query, user_id, product_id)
+        else:
+            query = "UPDATE cart_product SET quantity = $3, is_active = $4 WHERE user_id = $1 AND product_id = $2 RETURNING product_id, quantity, is_active"
+            result = await conn.fetchrow(
+                query,
+                user_id,
+                product_id,
+                cart_product_update.quantity,
+                cart_product_update.is_active,
+            )
         if result is None:
             raise Exception("Cart product not found")
 
@@ -113,5 +117,5 @@ class CartRepositoryImpl(CartRepository):
     async def delete_active_cart_products(
         self, user_id: UUID, conn: PoolConnectionProxy
     ) -> None:
-        query = "DELETE FROM cart_product WHERE user_id = $1 AND active = TRUE"
+        query = "DELETE FROM cart_product WHERE user_id = $1 AND is_active = TRUE"
         await conn.execute(query, user_id)
