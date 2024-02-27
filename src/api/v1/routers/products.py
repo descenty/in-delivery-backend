@@ -10,7 +10,7 @@ router = APIRouter(tags=["products"])
 @router.get(
     "/",
     response_model=list[ProductDTO],
-    name="query_products",
+    name="Query products",
 )
 async def query_products(
     query_products_request: QueryProductsRequest | None = None,
@@ -25,7 +25,7 @@ async def query_products(
 @router.get(
     "/search",
     response_model=list[ProductDTO],
-    name="search_products",
+    name="Search products",
 )
 async def search_products(
     text: str = "",

@@ -22,7 +22,7 @@ async def clean_address(
     )
 
 
-@router.get("/delivery-addresses", name="get-delivery-addresses")
+@router.get("/delivery-addresses", name="Get delivery addresses")
 async def get_delivery_addresses(
     user: User = Depends(get_user),
 ) -> list[DeliveryAddressDTO]:
@@ -33,7 +33,7 @@ async def get_delivery_addresses(
 
 @router.post(
     "/delivery-addresses",
-    name="add-delivery-address",
+    name="Add delivery address",
 )
 async def add_delivery_address(
     address: AddressDTO, user: User = Depends(get_user)
@@ -45,7 +45,7 @@ async def add_delivery_address(
 
 @router.delete(
     "/delivery-addresses/{address_id}",
-    name="delete-delivery-address",
+    name="Delete delivery address",
 )
 async def delete_delivery_address(
     address_id: UUID, user: User = Depends(get_user)

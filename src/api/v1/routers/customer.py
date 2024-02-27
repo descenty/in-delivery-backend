@@ -11,7 +11,7 @@ from services.customer_service import CustomerService
 router = APIRouter(tags=["customer"])
 
 
-@router.get("/customer", name="get-customer-data")
+@router.get("/customer", name="Get customer data")
 async def get_customer_data(
     user: User = Depends(get_user),
 ) -> Optional[CustomerDTO]:
@@ -20,7 +20,7 @@ async def get_customer_data(
     )
 
 
-@router.put("/delivery-addresses/{address_id}", name="select-delivery-address")
+@router.put("/delivery-addresses/{address_id}", name="Select delivery address")
 async def select_delivery_address(
     address_id: UUID, user: User = Depends(get_user)
 ) -> Optional[CustomerDTO]:

@@ -9,6 +9,7 @@ from schemas.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 @alru_cache(maxsize=1)
 async def get_public_key() -> str:
     async with AsyncClient() as client:

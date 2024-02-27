@@ -9,7 +9,7 @@ router = APIRouter(tags=["categories"])
 @router.get(
     "/all_parent",
     response_model=list[ParentCategoryDTO],
-    name="get_all_parent_categories",
+    name="Get all parent categories",
 )
 async def get_all_parent_categories() -> list[ParentCategoryDTO]:
     return await app_configuration.get_service(
@@ -20,7 +20,7 @@ async def get_all_parent_categories() -> list[ParentCategoryDTO]:
 @router.get(
     "/{category_slug}",
     response_model=CategoryCascadeDTO,
-    name="get_category",
+    name="Get category by slug",
 )
 async def get_category(category_slug: str) -> CategoryCascadeDTO:
     if category := await app_configuration.get_service(CategoryService).get_category(
