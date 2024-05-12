@@ -64,7 +64,8 @@ class OrderRepositoryImpl(OrderRepository):
         LEFT JOIN product AS p ON p.id = op.product_id \
         LEFT JOIN orders AS o ON o.id = op.order_id \
         WHERE o.user_id = $1 \
-        GROUP BY op.order_id, o.id, o.user_id, o.created_at, o.status, o.delivery_address"
+        GROUP BY op.order_id, o.id, o.user_id, o.created_at, o.status, o.delivery_address \
+        ORDER BY o.created_at DESC"
         results: list[Record] = await conn.fetch(query, user_id)
         return [
             OrderDTO.model_validate(

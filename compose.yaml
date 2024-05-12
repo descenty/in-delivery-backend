@@ -1,10 +1,11 @@
 services:
-  # app:
-  #   build: .
-  #   container_name: in-delivery-app
-  #   ports:
-  #     - 8001:8001
-  #   env_file: .env
+  app:
+    build: .
+    restart: always
+    container_name: in-delivery-app
+    ports:
+      - 8001:8001
+    env_file: .env
   keycloak:
     build: containers/keycloak
     container_name: in-delivery-keycloak

@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     )
     app_url: str = "http://localhost:8000"
     app_title: str = "in-delivery"
-    cors_allow_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_allow_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000", "http://85.193.83.61:3000"]
     postgres: PostgresSettings = PostgresSettings()
     keycloak: KeyCloakSettings = KeyCloakSettings()
     redis: RedisSettings = RedisSettings()
