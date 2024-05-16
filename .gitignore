@@ -162,3 +162,7 @@ cython_debug/
 background/xl_parser/cache/
 ipynb/
 .ruff_cache/
+
+certs/
+fullchain.pem
+privkey.pem
