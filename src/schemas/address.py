@@ -6,6 +6,7 @@ class AddressDTO(BaseModel):
     name: str
     latitude: float
     longitude: float
+    city_id: UUID
 
 
 class AddressRequest(BaseModel):
@@ -15,3 +16,5 @@ class AddressRequest(BaseModel):
 class DeliveryAddressDTO(BaseModel):
     id: UUID
     name: str
+    city: str
+    city_id: UUID

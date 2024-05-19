@@ -90,7 +90,6 @@ class RestaurantRepositoryImpl(RestaurantRepository):
         result: Optional[Record] = await conn.fetchrow(query, restaurant_id)
         if result is None:
             return None
-        print(result)
         return RestaurantDTO.model_validate(json.loads(result["json_build_object"]))
 
     async def get_admin_restaurants(

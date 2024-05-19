@@ -54,6 +54,9 @@ class AddressServiceImpl(AddressService):
                 name=json_data[0]["result"],
                 latitude=json_data[0]["geo_lat"],
                 longitude=json_data[0]["geo_lon"],
+                city_id=UUID(
+                    "e87fc0af-1bc6-41b7-a5fc-76f8653549dc"
+                ),  # hardcoded to Moscow city_id, should be changed in future
             )
 
     async def add_delivery_address(self, address: AddressDTO, user_id: UUID) -> None:

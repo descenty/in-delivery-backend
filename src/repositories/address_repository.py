@@ -40,9 +40,9 @@ class AddressRepositoryImpl(AddressRepository):
     async def add_delivery_address(
         self, address: AddressDTO, user_id: UUID, conn: PoolConnectionProxy
     ) -> UUID:
-        query = "INSERT INTO customer_delivery_address (user_id, name, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id"
+        query = "INSERT INTO customer_delivery_address (user_id, name, latitude, longitude, city_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
         result = await conn.fetchrow(
-            query, user_id, address.name, address.latitude, address.longitude
+            query, user_id, address.name, address.latitude, address.longitude, address.city_id
         )
         if result is None:
             raise ValueError("Failed to add delivery address")
@@ -51,7 +51,7 @@ class AddressRepositoryImpl(AddressRepository):
     async def get_delivery_addresses(
         self, user_id: UUID, conn: PoolConnectionProxy
     ) -> list[DeliveryAddressDTO]:
-        query = "SELECT id, name FROM customer_delivery_address WHERE user_id = $1"
+        query = 'SELECT customer_delivery_address.id, customer_delivery_address.name, city.name "city", city.id "city_id" FROM customer_delivery_address JOIN city ON city.id = customer_delivery_address.city_id WHERE user_id = $1'
         result = await conn.fetch(query, user_id)
         return [DeliveryAddressDTO.model_validate({**address}) for address in result]
 

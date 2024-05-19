@@ -32,3 +32,11 @@ async def create_order(user: User = Depends(get_user)) -> Optional[OrderDTO]:
     return await app_configuration.get_service(OrderService).create_order_from_cart(
         user.id
     )
+
+@router.post("/orders/{order_id}/complete", name="Complete order")
+async def complete_order(order_id: UUID, user: User = Depends(get_user)) -> Optional[str]:
+    return await app_configuration.get_service(OrderService).complete_order(order_id, user.id)
+
+@router.get("/orders/{order_id}/is_admin", name="Check if user is admin of order's restaurant")
+async def is_order_admin(order_id: UUID, user: User = Depends(get_user)) -> bool:
+    return await app_configuration.get_service(OrderService).is_order_restaurant_admin(order_id, user.id)

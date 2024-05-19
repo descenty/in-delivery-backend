@@ -6,7 +6,7 @@ from uuid import UUID
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
 from schemas.cart_product import CartProductDB
-from schemas.order import OrderDB, OrderDTO
+from schemas.order import ORDER_STATUS, OrderDB, OrderDTO
 
 from repositories import Repository
 from schemas.order_product import OrderProductDTO
@@ -34,6 +34,22 @@ class OrderRepository(Repository):
         user_id: UUID,
         conn: PoolConnectionProxy,
     ) -> Optional[OrderDB]: ...
+
+    @abstractmethod
+    async def is_order_restaurant_admin(
+        self,
+        order_id: UUID,
+        user_id: UUID,
+        conn: PoolConnectionProxy,
+    ) -> bool: ...
+
+    @abstractmethod
+    async def complete_order(
+        self,
+        order_id: UUID,
+        user_id: UUID,
+        conn: PoolConnectionProxy,
+    ) -> Optional[str]: ...
 
 
 class OrderRepositoryImpl(OrderRepository):
@@ -168,16 +184,19 @@ class OrderRepositoryImpl(OrderRepository):
             cart_product.price * cart_product.quantity for cart_product in cart_products
         )
 
-        delivery_address_query = "SELECT customer_delivery_address.name, customer_delivery_address.city_id FROM customer_delivery_address JOIN customer ON customer.delivery_address_id = customer_delivery_address.id WHERE customer.user_id = $1"
-        delivery_address, city_id = await conn.fetchval(delivery_address_query, user_id)
+        delivery_address_query = "SELECT customer_delivery_address.name FROM customer_delivery_address JOIN customer ON customer.delivery_address_id = customer_delivery_address.id WHERE customer.user_id = $1"
+        delivery_address, city_id = (
+            await conn.fetchval(delivery_address_query, user_id),
+            "e87fc0af-1bc6-41b7-a5fc-76f8653549dc",
+        )
 
         restaurant_id_query = (
-            "SELECT restaurant_id FROM product WHERE city_id = $1 LIMIT 1"
+            "SELECT id FROM restaurant WHERE city_id = $1 LIMIT 1"
         )
         restaurant_id = await conn.fetchval(restaurant_id_query, city_id)
 
         order_query = "INSERT INTO orders (user_id, total_price, delivery_address, status, restaurant_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-        result: Optional[Record] = await conn.fetchrow(
+        new_order: Optional[Record] = await conn.fetchrow(
             order_query,
             user_id,
             total_price,
@@ -185,9 +204,9 @@ class OrderRepositoryImpl(OrderRepository):
             "confirmed",
             restaurant_id,
         )
-        if result is None:
+        if new_order is None:
             raise Exception("Order creation failed")
-        order_id = result[0]
+        order_id = new_order[0]
 
         order_products_query = "INSERT INTO order_product (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)"
         for cart_product in cart_products:
@@ -200,3 +219,25 @@ class OrderRepositoryImpl(OrderRepository):
             )
 
         return await self.get_user_order_by_id(user_id, order_id, conn)
+
+    async def is_order_restaurant_admin(
+        self,
+        order_id: UUID,
+        user_id: UUID,
+        conn: PoolConnectionProxy,
+    ) -> bool:
+        # orders JOIN restaurant ON orders.restaurant_id = restaurant.id and restaurant.admin_id = $2
+        query = "SELECT EXISTS(SELECT 1 FROM orders JOIN restaurant ON orders.restaurant_id = restaurant.id WHERE orders.id = $1 AND restaurant.admin_user_id = $2)"
+        return await conn.fetchval(query, order_id, user_id)
+
+    async def complete_order(
+        self,
+        order_id: UUID,
+        user_id: UUID,
+        conn: PoolConnectionProxy,
+    ) -> Optional[str]:
+        if not await self.is_order_restaurant_admin(order_id, user_id, conn):
+            return None
+        query = f"UPDATE orders SET status = '{ORDER_STATUS.DELIVERED.value}' WHERE id = $1 RETURNING *"
+        await conn.execute(query, order_id)
+        return "delivered"
