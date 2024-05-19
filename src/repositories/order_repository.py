@@ -159,21 +159,31 @@ class OrderRepositoryImpl(OrderRepository):
         conn: PoolConnectionProxy,
     ) -> Optional[OrderDB]:
         cart_products_query = "SELECT cp.product_id, cp.quantity, p.price, cp.is_active FROM cart_product cp LEFT JOIN product p ON p.id = cp.product_id WHERE cp.user_id = $1"
-        cart_products = [
+        cart_products: list[CartProductDB] = [
             CartProductDB.model_validate({**cart_product} | {"user_id": user_id})
             for cart_product in await conn.fetch(cart_products_query, user_id)
         ]
 
-        total_price = sum(
+        total_price: float = sum(
             cart_product.price * cart_product.quantity for cart_product in cart_products
         )
 
-        delivery_address_query = "SELECT customer_delivery_address.name FROM customer_delivery_address JOIN customer ON customer.delivery_address_id = customer_delivery_address.id WHERE customer.user_id = $1"
-        delivery_address = await conn.fetchval(delivery_address_query, user_id)
+        delivery_address_query = "SELECT customer_delivery_address.name, customer_delivery_address.city_id FROM customer_delivery_address JOIN customer ON customer.delivery_address_id = customer_delivery_address.id WHERE customer.user_id = $1"
+        delivery_address, city_id = await conn.fetchval(delivery_address_query, user_id)
 
-        order_query = "INSERT INTO orders (user_id, total_price, delivery_address, status) VALUES ($1, $2, $3, $4) RETURNING id"
+        restaurant_id_query = (
+            "SELECT restaurant_id FROM product WHERE city_id = $1 LIMIT 1"
+        )
+        restaurant_id = await conn.fetchval(restaurant_id_query, city_id)
+
+        order_query = "INSERT INTO orders (user_id, total_price, delivery_address, status, restaurant_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
         result: Optional[Record] = await conn.fetchrow(
-            order_query, user_id, total_price, delivery_address, "confirmed"
+            order_query,
+            user_id,
+            total_price,
+            delivery_address,
+            "confirmed",
+            restaurant_id,
         )
         if result is None:
             raise Exception("Order creation failed")

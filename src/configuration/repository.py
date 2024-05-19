@@ -6,6 +6,7 @@ from repositories.category_repository import CategoryRepository
 from repositories.customer_repository import CustomerRepository
 from repositories.order_repository import OrderRepository
 from repositories.product_repository import ProductRepository
+from repositories.restaurant_repository import RestaurantRepository
 
 from configuration import Configuration
 
@@ -18,3 +19,4 @@ class RepositoriesConfiguration(Configuration):
     order_repository: type[OrderRepository]
     address_repository: type[AddressRepository]
     customer_repository: type[CustomerRepository]
+    restaurant_repository: type[RestaurantRepository]

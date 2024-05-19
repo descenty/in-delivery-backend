@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from api.router import api_router
@@ -18,6 +19,9 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api")
 
+@app.get("/")
+def main() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
 
 if __name__ == "__main__":
     import uvicorn

@@ -7,6 +7,7 @@ from .routers.cart import router as cart_router
 from .routers.addresses import router as addresses_router
 from .routers.customer import router as customer_router
 from .routers.orders import router as orders_router
+from .routers.restaurants import router as restaurants_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -16,3 +17,4 @@ api_router.include_router(cart_router, tags=["cart"])
 api_router.include_router(addresses_router, tags=["addresses"])
 api_router.include_router(customer_router, tags=["customer"])
 api_router.include_router(orders_router, tags=["orders"])
+api_router.include_router(restaurants_router, prefix="/restaurants", tags=["restaurants"])
