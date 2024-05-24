@@ -166,3 +166,5 @@ ipynb/
 certs/
 fullchain.pem
 privkey.pem
+
+documents/

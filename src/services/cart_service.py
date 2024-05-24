@@ -49,26 +49,29 @@ class CartService(Service):
 class CartServiceImpl(CartService):
     async def get_cart(self, user_id: UUID) -> CartDTO:
         async with self.conn_pool.acquire() as conn:
-            return await self.repository.get_user_cart(user_id, conn)
+            async with conn.transaction():
+                return await self.repository.get_user_cart(user_id, conn)
 
     async def add_product_to_cart(
         self, user_id: UUID, product_id: UUID, quantity: int
     ) -> Optional[UUID]:
         async with self.conn_pool.acquire() as conn:
-            return await self.repository.add_product_to_cart(
-                user_id, product_id, quantity, conn
-            )
+            async with conn.transaction():
+                return await self.repository.add_product_to_cart(
+                    user_id, product_id, quantity, conn
+                )
 
     async def add_product_to_cart_and_fetch(
         self, user_id: UUID, product_id: UUID, quantity: int
     ) -> Optional[CartDTO]:
         async with self.conn_pool.acquire() as conn:
-            cart_product_id = await self.repository.add_product_to_cart(
-                user_id, product_id, quantity, conn
-            )
-            if cart_product_id is None:
-                return None
-            return await self.repository.get_user_cart(user_id, conn)
+            async with conn.transaction():
+                cart_product_id = await self.repository.add_product_to_cart(
+                    user_id, product_id, quantity, conn
+                )
+                if cart_product_id is None:
+                    return None
+                return await self.repository.get_user_cart(user_id, conn)
 
     async def update_cart_product(
         self,

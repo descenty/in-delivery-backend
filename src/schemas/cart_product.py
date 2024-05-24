@@ -6,9 +6,7 @@ from schemas.product import ProductShortDTO
 
 class CartProductDTO(BaseModel):
     product: ProductShortDTO
-    # user_id: int
     quantity: int
-    # is_active: bool
 
 
 class CartProductDB(BaseModel):

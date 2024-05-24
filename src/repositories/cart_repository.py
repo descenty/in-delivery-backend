@@ -1,14 +1,15 @@
-from abc import abstractmethod
 import json
+from abc import abstractmethod
 from typing import Optional
 from uuid import UUID
+
 from asyncpg import Record
-from repositories import Repository
+from asyncpg.pool import PoolConnectionProxy
 from schemas.cart import CartDTO
 from schemas.cart_product import CartProductDTO, CartProductUpdateRequest
-from asyncpg.pool import PoolConnectionProxy
-
 from schemas.product import ProductShortDTO
+
+from repositories import Repository
 
 
 class CartRepository(Repository):
@@ -46,11 +47,19 @@ class CartRepository(Repository):
 
 class CartRepositoryImpl(CartRepository):
     async def get_user_cart(self, user_id: UUID, conn: PoolConnectionProxy) -> CartDTO:
-        query = "SELECT JSON_AGG \
-            (JSON_BUILD_OBJECT('product', JSON_BUILD_OBJECT('id', p.id, 'title', p.title, 'price', p.price, 'description', p.description), 'quantity', cp.quantity)), \
-                SUM(p.price * cp.quantity) total_price FROM cart_product cp \
-                    LEFT JOIN product p ON p.id = cp.product_id \
-                        WHERE cp.user_id = $1 GROUP BY cp.user_id"
+        query = "SELECT JSON_AGG ( \
+            JSON_BUILD_OBJECT('product', \
+                JSON_BUILD_OBJECT( \
+                    'id', p.id, \
+                    'title', p.title, \
+                    'price', p.price, \
+                    'description', p.description \
+                ), \
+            'quantity', cp.quantity)), \
+            SUM(p.price * cp.quantity) total_price FROM cart_product cp \
+            LEFT JOIN product p ON p.id = cp.product_id \
+            WHERE cp.user_id = $1 GROUP BY cp.user_id"
+
         result: Optional[Record] = await conn.fetchrow(query, user_id)
         if result is None:
             return CartDTO.model_validate({"products": [], "total_price": 0})
