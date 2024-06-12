@@ -1,11 +1,4 @@
 services:
-  app:
-    build: .
-    restart: always
-    container_name: in-delivery-app
-    ports:
-      - 8001:8001
-    env_file: .env
   keycloak:
     build: containers/keycloak
     container_name: in-delivery-keycloak
@@ -21,9 +14,28 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD}
       KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/certs/tls.crt
       KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/certs/tls.key
-    healthcheck:
-      test:
-        ["CMD", "curl", "--head", "fsS", "https://keycloak:8443/health/ready"]
-      interval: 5s
-      timeout: 2s
-      retries: 15
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+  redis:
+    image: redis:7
+    container_name: in-delivery-redis
+    # expose:
+      # - 6379
+    ports:
+      - 6379:6379
+    command:
+    - /bin/sh
+    - -c
+    - redis-server --requirepass "$${REDIS__PASSWORD:?REDIS__PASSWORD variable is not set}"
+    environment:
+      TZ: Europe/Moscow
+      REDIS__PASSWORD: ${REDIS__PASSWORD}
+  app:
+    build: .
+    restart: always
+    container_name: in-delivery-app
+    ports:
+      - 8001:8001
+    env_file: .env
+    depends_on:
+      - redis

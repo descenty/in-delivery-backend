@@ -9,20 +9,15 @@ from fastapi import BackgroundTasks
 
 from core.config import settings
 
-logger = logging.getLogger('uvicorn')
-
-redis_url = ''.join(
-    [
-        'redis://',
-        f':{settings.redis.password}@',
-        f'{settings.redis.host}:',
-        f'{settings.redis.port}',
-    ]
-)
+logger = logging.getLogger("uvicorn")
 
 
 def redis() -> aioredis.Redis:
-    return aioredis.from_url(redis_url)
+    return aioredis.Redis(
+        host=settings.redis.host,
+        port=settings.redis.port,
+        password=settings.redis.password,
+    )
 
 
 class RedisClient:
@@ -39,11 +34,12 @@ class RedisClient:
             try:
                 if self.is_available != await redis().ping():
                     self.is_available = True
-                    logger.info('Redis is available')
-            except Exception:
+                    logger.info("Redis is available")
+            except Exception as e:
                 if self.is_available:
                     self.is_available = False
-                    logger.error('Redis is unavailable')
+                logger.error("Redis is unavailable")
+                logger.error(f"Redis error: {e}")
             await asyncio.sleep(60)
 
     async def flush(self):
@@ -51,15 +47,15 @@ class RedisClient:
             if self.is_available:
                 await redis().flushall()
         except Exception as e:
-            logger.error(f'Redis flush error: {e}')
+            logger.error(f"Redis flush error: {e}")
 
     async def get(self, key: str, **kwargs) -> Any | None:
         try:
             if self.is_available and (data := await redis().get(key, **kwargs)):
-                logger.info(f'get cache [{key}]')
+                logger.info(f"get cache [{key}]")
                 return data
         except Exception as e:
-            logger.error(f'Redis get error: {e}')
+            logger.error(f"Redis get error: {e}")
         return None
 
     async def set(
@@ -67,14 +63,14 @@ class RedisClient:
     ) -> Any | None:
         try:
             if self.is_available:
-                logger.info(f'set cache [{key}]')
+                logger.info(f"set cache [{key}]")
                 await redis().set(
                     key,
                     value,
                     ex=ex,
                 )
         except Exception as e:
-            logger.error(f'Redis set error: {e}')
+            logger.error(f"Redis set error: {e}")
         return None
 
     async def delete(self, keys: str | list[str]) -> Any | None:
@@ -89,9 +85,9 @@ class RedisClient:
                             if isinstance(key_match, str)
                             else key_match.decode()
                         )
-                        logger.info(f'invalidate cache [{deleted_key}]')
+                        logger.info(f"invalidate cache [{deleted_key}]")
         except Exception as e:
-            logger.error(f'Redis delete error: {e}')
+            logger.error(f"Redis delete error: {e}")
         return None
 
 
@@ -110,14 +106,16 @@ def cached(key: str, **cache_kwargs):
                 or not (rclient := redis_client()).is_available
             ):
                 return await func(**kwargs)
-            key_format = key.format(**kwargs)
+            key_format = key.format(**kwargs) # TODO add optional kwargs
             if data := await rclient.get(key_format):
                 return pickle.loads(data)
             result = await func(**kwargs)
-            background_tasks: BackgroundTasks = args[0].background_tasks
-            background_tasks.add_task(
-                rclient.set, key_format, pickle.dumps(result), **cache_kwargs
-            )
+            # background_tasks: BackgroundTasks = args[0].background_tasks
+            # background_tasks.add_task(
+            #     rclient.set, key_format, pickle.dumps(result), **cache_kwargs
+            # )
+            # TODO fix background_tasks
+            await rclient.set(key_format, pickle.dumps(result), **cache_kwargs)
             return result
 
         return wrapper

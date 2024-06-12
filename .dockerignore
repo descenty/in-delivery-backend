@@ -143,4 +143,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+.ruff_cache/
+
 admin/
+dump.sql
+dump.bak

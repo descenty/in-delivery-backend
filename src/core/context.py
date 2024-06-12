@@ -1,6 +1,7 @@
 import asyncio
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from cache.redis import redis_client
 from configuration.app import AppConfiguration
 from configuration.current import app_configuration
 
@@ -53,9 +54,7 @@ from core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # # await init_db()
-    # # redis_client()
-    # )
+    redis_client()
     app_configuration.conn_pool = await get_connection_pool(settings.postgres)
     yield
     await app_configuration.conn_pool.close()

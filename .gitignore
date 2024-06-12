@@ -168,3 +168,5 @@ fullchain.pem
 privkey.pem
 
 documents/
+dump.sql
+dump.bak

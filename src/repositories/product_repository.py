@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from asyncpg.pool import PoolConnectionProxy
 
+from cache.redis import cached
 from repositories import Repository
 from schemas.product import ProductDB
 
@@ -16,6 +17,7 @@ class ProductRepository(Repository):
 
 
 class ProductRepositoryImpl(ProductRepository):
+    # @cached("product-{text}-{category_slug}")
     async def query_products(
         self,
         conn: PoolConnectionProxy,
